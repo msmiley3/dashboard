@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Dashboard</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Dashboard">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </h1>
+                <div class="header-info">
+                    <div class="current-time" id="currentTime"></div>
+                    <div class="current-date" id="currentDate"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Search Section -->
+            <section class="search-section">
+                <div class="search-container">
+                    <div class="search-input-wrapper">
+                        <input type="text" id="searchInput" placeholder="Search anything..." class="search-input">
+                        <button id="searchBtn" class="search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="search-sources">
+                        <button class="source-btn active" data-source="google">
+                            <i class="fab fa-google"></i> Google
+                        </button>
+                        <button class="source-btn" data-source="duckduckgo">
+                            <i class="fas fa-search"></i> DuckDuckGo
+                        </button>
+                        <button class="source-btn" data-source="wikipedia">
+                            <i class="fab fa-wikipedia-w"></i> Wikipedia
+                        </button>
+                        <button class="source-btn" data-source="youtube">
+                            <i class="fab fa-youtube"></i> YouTube
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Widget Grid -->
+            <section class="widgets-grid">
+                <!-- Weather Widget -->
+                <div class="widget weather-widget">
+                    <h3 class="widget-title">
+                        <i class="fas fa-cloud-sun"></i>
+                        Weather
+                    </h3>
+                    <div class="weather-content" id="weatherContent">
+                        <div class="weather-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Loading weather...
+                        </div>
+                    </div>
+                    <button class="weather-location-btn" id="weatherLocationBtn">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Get Location
+                    </button>
+                </div>
+
+                <!-- Quick Notes Widget -->
+                <div class="widget notes-widget">
+                    <h3 class="widget-title">
+                        <i class="fas fa-sticky-note"></i>
+                        Quick Notes
+                    </h3>
+                    <div class="notes-content">
+                        <textarea id="quickNotes" placeholder="Write your notes here..." class="notes-textarea"></textarea>
+                        <div class="notes-actions">
+                            <button id="saveNotes" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            <button id="clearNotes" class="btn btn-secondary">
+                                <i class="fas fa-trash"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bookmarks Widget -->
+                <div class="widget bookmarks-widget">
+                    <h3 class="widget-title">
+                        <i class="fas fa-bookmark"></i>
+                        Bookmarks
+                    </h3>
+                    <div class="bookmarks-content">
+                        <div class="bookmark-form">
+                            <input type="text" id="bookmarkTitle" placeholder="Bookmark title" class="bookmark-input">
+                            <input type="url" id="bookmarkUrl" placeholder="https://example.com" class="bookmark-input">
+                            <button id="addBookmark" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                        <div class="bookmarks-list" id="bookmarksList">
+                            <!-- Bookmarks will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links Widget -->
+                <div class="widget quick-links-widget">
+                    <h3 class="widget-title">
+                        <i class="fas fa-external-link-alt"></i>
+                        Quick Links
+                    </h3>
+                    <div class="quick-links-grid">
+                        <a href="https://gmail.com" class="quick-link" target="_blank">
+                            <i class="fas fa-envelope"></i>
+                            <span>Gmail</span>
+                        </a>
+                        <a href="https://calendar.google.com" class="quick-link" target="_blank">
+                            <i class="fas fa-calendar"></i>
+                            <span>Calendar</span>
+                        </a>
+                        <a href="https://drive.google.com" class="quick-link" target="_blank">
+                            <i class="fas fa-cloud"></i>
+                            <span>Drive</span>
+                        </a>
+                        <a href="https://github.com" class="quick-link" target="_blank">
+                            <i class="fab fa-github"></i>
+                            <span>GitHub</span>
+                        </a>
+                        <a href="https://youtube.com" class="quick-link" target="_blank">
+                            <i class="fab fa-youtube"></i>
+                            <span>YouTube</span>
+                        </a>
+                        <a href="https://reddit.com" class="quick-link" target="_blank">
+                            <i class="fab fa-reddit"></i>
+                            <span>Reddit</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ToDo Widget -->
+                <div class="widget todo-widget">
+                    <h3 class="widget-title">
+                        <i class="fas fa-tasks"></i>
+                        To-Do List
+                    </h3>
+                    <div class="todo-content">
+                        <div class="todo-form">
+                            <input type="text" id="todoInput" placeholder="Add a new task..." class="todo-input">
+                            <button id="addTodo" class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="todo-list" id="todoList">
+                            <!-- Todo items will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculator Widget -->
+                <div class="widget calculator-widget">
+                    <h3 class="widget-title">
+                        <i class="fas fa-calculator"></i>
+                        Calculator
+                    </h3>
+                    <div class="calculator">
+                        <div class="calculator-display">
+                            <input type="text" id="calculatorDisplay" readonly class="calc-display">
+                        </div>
+                        <div class="calculator-buttons">
+                            <button class="calc-btn calc-clear" onclick="clearCalculator()">C</button>
+                            <button class="calc-btn calc-operator" onclick="appendToCalculator('/')">/</button>
+                            <button class="calc-btn calc-operator" onclick="appendToCalculator('*')">×</button>
+                            <button class="calc-btn calc-operator" onclick="deleteLast()">⌫</button>
+                            
+                            <button class="calc-btn calc-number" onclick="appendToCalculator('7')">7</button>
+                            <button class="calc-btn calc-number" onclick="appendToCalculator('8')">8</button>
+                            <button class="calc-btn calc-number" onclick="appendToCalculator('9')">9</button>
+                            <button class="calc-btn calc-operator" onclick="appendToCalculator('-')">−</button>
+                            
+                            <button class="calc-btn calc-number" onclick="appendToCalculator('4')">4</button>
+                            <button class="calc-btn calc-number" onclick="appendToCalculator('5')">5</button>
+                            <button class="calc-btn calc-number" onclick="appendToCalculator('6')">6</button>
+                            <button class="calc-btn calc-operator" onclick="appendToCalculator('+')">+</button>
+                            
+                            <button class="calc-btn calc-number" onclick="appendToCalculator('1')">1</button>
+                            <button class="calc-btn calc-number" onclick="appendToCalculator('2')">2</button>
+                            <button class="calc-btn calc-number" onclick="appendToCalculator('3')">3</button>
+                            <button class="calc-btn calc-equals" onclick="calculateResult()" rowspan="2">=</button>
+                            
+                            <button class="calc-btn calc-number calc-zero" onclick="appendToCalculator('0')">0</button>
+                            <button class="calc-btn calc-number" onclick="appendToCalculator('.')">.</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Install PWA Button -->
+        <button id="installBtn" class="install-btn" style="display: none;">
+            <i class="fas fa-download"></i>
+            Install App
+        </button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
