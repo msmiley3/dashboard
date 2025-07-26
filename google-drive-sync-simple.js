@@ -1,8 +1,8 @@
 // Simplified Google Drive Sync for Dashboard
 class GoogleDriveSyncSimple {
     constructor() {
-        this.clientId = 'YOUR_GOOGLE_CLIENT_ID'; // Replace this
-        this.apiKey = 'YOUR_GOOGLE_API_KEY';     // Replace this
+        this.clientId = '791175486652-3u13nogr11nfp9k4t0o0cp4k9jev6hd4.apps.googleusercontent.com';
+        this.apiKey = 'AIzaSyCBav64Zfasu1bMHumUvvLVZCjvuPjYu6s';
         this.isEnabled = false;
         this.fileId = null;
         this.fileName = 'dashboard-data.json';
@@ -193,4 +193,4 @@ class GoogleDriveSyncSimple {
 }
 
 // Export for use in main script
-window.GoogleDriveSyncSimple = GoogleDriveSyncSimple; 
+window.GoogleDriveSyncSimple = GoogleDriveSyncSimple;
