@@ -1,10 +1,13 @@
 // Global variables
 let bookmarks = [];
 let notes = [];
+let stocks = [];
+let newsFeeds = [];
+let aiChatHistory = [];
 let editMode = false;
 let selectedBookmarks = new Set();
 let useServer = false;
-let serverUrl = 'http://192.168.1.100:3000'; // Change this to your computer's IP
+let serverUrl = 'http://192.168.1.100:3000';
 let googleDriveSync = null;
 
 // Theme and font configurations
@@ -78,6 +81,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     loadThemeSettings();
     renderBookmarks();
     renderNotes();
+    renderStocks();
+    renderNews();
+    renderAIChat();
     
     // Check if server is available
     checkServerStatus();
@@ -103,7 +109,7 @@ async function checkServerStatus() {
 // Initialize Google Drive sync
 async function initGoogleDriveSync() {
     try {
-        googleDriveSync = new GoogleDriveSync();
+        googleDriveSync = new GoogleDriveSyncSimple();
         const result = await googleDriveSync.init();
         console.log('Google Drive sync:', result.message);
     } catch (error) {
@@ -114,8 +120,14 @@ async function initGoogleDriveSync() {
 // Enable Google Drive sync
 async function enableGoogleDriveSync() {
     if (!googleDriveSync) {
-        alert('Google Drive sync not initialized. Please check your API credentials.');
-        return;
+        // Try to initialize if not already done
+        try {
+            googleDriveSync = new GoogleDriveSyncSimple();
+            await googleDriveSync.init();
+        } catch (error) {
+            alert('Google Drive sync not initialized. Please check your API credentials.');
+            return;
+        }
     }
     
     try {
@@ -248,6 +260,9 @@ async function loadData() {
                 const data = await response.json();
                 bookmarks = data.bookmarks || [];
                 notes = data.notes || [];
+                stocks = data.stocks || [];
+                newsFeeds = data.newsFeeds || [];
+                aiChatHistory = data.aiChatHistory || [];
                 
                 // Load settings
                 if (data.settings) {
@@ -275,6 +290,9 @@ async function loadData() {
 function loadFromLocalStorage() {
     const savedBookmarks = localStorage.getItem('dashboard_bookmarks');
     const savedNotes = localStorage.getItem('dashboard_notes');
+    const savedStocks = localStorage.getItem('dashboard_stocks');
+    const savedNewsFeeds = localStorage.getItem('dashboard_newsFeeds');
+    const savedAIChatHistory = localStorage.getItem('dashboard_aiChatHistory');
     
     if (savedBookmarks) {
         bookmarks = JSON.parse(savedBookmarks);
@@ -283,6 +301,18 @@ function loadFromLocalStorage() {
     if (savedNotes) {
         notes = JSON.parse(savedNotes);
     }
+    
+    if (savedStocks) {
+        stocks = JSON.parse(savedStocks);
+    }
+    
+    if (savedNewsFeeds) {
+        newsFeeds = JSON.parse(savedNewsFeeds);
+    }
+    
+    if (savedAIChatHistory) {
+        aiChatHistory = JSON.parse(savedAIChatHistory);
+    }
 }
 
 // Save data to localStorage or server
@@ -290,6 +320,9 @@ async function saveData() {
     const data = {
         bookmarks: bookmarks,
         notes: notes,
+        stocks: stocks,
+        newsFeeds: newsFeeds,
+        aiChatHistory: aiChatHistory,
         settings: {
             theme: localStorage.getItem('dashboard_theme'),
             font: localStorage.getItem('dashboard_font')
@@ -322,6 +355,9 @@ async function saveData() {
 function saveToLocalStorage() {
     localStorage.setItem('dashboard_bookmarks', JSON.stringify(bookmarks));
     localStorage.setItem('dashboard_notes', JSON.stringify(notes));
+    localStorage.setItem('dashboard_stocks', JSON.stringify(stocks));
+    localStorage.setItem('dashboard_newsFeeds', JSON.stringify(newsFeeds));
+    localStorage.setItem('dashboard_aiChatHistory', JSON.stringify(aiChatHistory));
 }
 
 // Setup event listeners
@@ -350,6 +386,22 @@ function setupEventListeners() {
         e.preventDefault();
         updateNote();
     });
+}
+
+// Side menu functions
+function toggleSideMenu() {
+    const sideMenu = document.getElementById('sideMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+    
+    if (sideMenu.classList.contains('active')) {
+        sideMenu.classList.remove('active');
+        menuOverlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    } else {
+        sideMenu.classList.add('active');
+        menuOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
 }
 
 // Tab functionality
@@ -834,6 +886,402 @@ function addSampleData() {
     saveData();
     renderBookmarks();
     renderNotes();
+}
+
+// Backup and Load functions
+function backupData() {
+    const data = {
+        bookmarks: bookmarks,
+        notes: notes,
+        stocks: stocks,
+        newsFeeds: newsFeeds,
+        aiChatHistory: aiChatHistory,
+        settings: {
+            theme: localStorage.getItem('dashboard_theme'),
+            font: localStorage.getItem('dashboard_font')
+        },
+        timestamp: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `dashboard-backup-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+function loadData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.bookmarks) bookmarks = data.bookmarks;
+                    if (data.notes) notes = data.notes;
+                    if (data.stocks) stocks = data.stocks;
+                    if (data.newsFeeds) newsFeeds = data.newsFeeds;
+                    if (data.aiChatHistory) aiChatHistory = data.aiChatHistory;
+                    
+                    // Load settings
+                    if (data.settings) {
+                        if (data.settings.theme) {
+                            changeTheme(data.settings.theme);
+                            document.getElementById('themeSelect').value = data.settings.theme;
+                        }
+                        if (data.settings.font) {
+                            changeFont(data.settings.font);
+                            document.getElementById('fontSelect').value = data.settings.font;
+                        }
+                    }
+                    
+                    saveData();
+                    renderBookmarks();
+                    renderNotes();
+                    renderStocks();
+                    renderNews();
+                    renderAIChat();
+                    
+                    alert('Data loaded successfully!');
+                } catch (error) {
+                    alert('Error reading file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+    };
+    input.click();
+}
+
+// Quick add bookmark function
+function quickAddBookmark() {
+    const title = document.getElementById('quickBookmarkTitle').value.trim();
+    const url = document.getElementById('quickBookmarkUrl').value.trim();
+    
+    if (!title || !url) {
+        alert('Please enter both title and URL');
+        return;
+    }
+    
+    const bookmark = {
+        id: Date.now(),
+        title: title,
+        url: url,
+        createdAt: new Date().toISOString()
+    };
+    
+    bookmarks.push(bookmark);
+    saveData();
+    renderBookmarks();
+    
+    // Clear inputs
+    document.getElementById('quickBookmarkTitle').value = '';
+    document.getElementById('quickBookmarkUrl').value = '';
+}
+
+// Stock ticker functions
+function addStockTicker() {
+    const symbol = prompt('Enter stock symbol (e.g., AAPL, GOOGL):').toUpperCase();
+    if (!symbol) return;
+    
+    const stock = {
+        id: Date.now(),
+        symbol: symbol,
+        price: 'Loading...',
+        change: '0.00',
+        changePercent: '0.00%',
+        lastUpdated: new Date().toISOString()
+    };
+    
+    stocks.push(stock);
+    saveData();
+    renderStocks();
+    fetchStockPrice(symbol, stock.id);
+}
+
+function fetchStockPrice(symbol, stockId) {
+    // Using a free stock API (you'll need to sign up for a free API key)
+    const apiKey = 'demo'; // Replace with your API key from https://www.alphavantage.co/
+    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data['Global Quote']) {
+                const quote = data['Global Quote'];
+                const stock = stocks.find(s => s.id === stockId);
+                if (stock) {
+                    stock.price = parseFloat(quote['05. price']).toFixed(2);
+                    stock.change = parseFloat(quote['09. change']).toFixed(2);
+                    stock.changePercent = quote['10. change percent'];
+                    stock.lastUpdated = new Date().toISOString();
+                    saveData();
+                    renderStocks();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching stock data:', error);
+            // Fallback to demo data
+            const stock = stocks.find(s => s.id === stockId);
+            if (stock) {
+                stock.price = 'Demo: $150.00';
+                stock.change = '+2.50';
+                stock.changePercent = '+1.67%';
+                saveData();
+                renderStocks();
+            }
+        });
+}
+
+function renderStocks() {
+    const container = document.getElementById('stocksContainer');
+    
+    if (stocks.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-chart-line"></i>
+                <h3>No stock tickers yet</h3>
+                <p>Add your first stock ticker to get started!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    stocks.forEach(stock => {
+        const changeClass = stock.change.startsWith('-') ? 'negative' : 'positive';
+        html += `
+            <div class="stock-card">
+                <div class="stock-symbol">${stock.symbol}</div>
+                <div class="stock-price">$${stock.price}</div>
+                <div class="stock-change ${changeClass}">
+                    ${stock.change} (${stock.changePercent})
+                </div>
+                <div class="stock-actions">
+                    <button onclick="deleteStock(${stock.id})" class="delete-btn">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function deleteStock(id) {
+    if (confirm('Delete this stock ticker?')) {
+        stocks = stocks.filter(stock => stock.id !== id);
+        saveData();
+        renderStocks();
+    }
+}
+
+function refreshStocks() {
+    stocks.forEach(stock => {
+        fetchStockPrice(stock.symbol, stock.id);
+    });
+}
+
+// RSS News functions
+function addRSSFeed() {
+    const name = prompt('Enter feed name:');
+    const url = prompt('Enter RSS feed URL:');
+    
+    if (!name || !url) return;
+    
+    const feed = {
+        id: Date.now(),
+        name: name,
+        url: url,
+        articles: [],
+        lastUpdated: new Date().toISOString()
+    };
+    
+    newsFeeds.push(feed);
+    saveData();
+    renderNews();
+    fetchRSSFeed(feed.id);
+}
+
+function fetchRSSFeed(feedId) {
+    const feed = newsFeeds.find(f => f.id === feedId);
+    if (!feed) return;
+    
+    // Using a CORS proxy to fetch RSS feeds
+    const proxyUrl = 'https://api.allorigins.win/raw?url=';
+    const url = proxyUrl + encodeURIComponent(feed.url);
+    
+    fetch(url)
+        .then(response => response.text())
+        .then(data => {
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(data, 'text/xml');
+            const items = xml.querySelectorAll('item');
+            
+            feed.articles = Array.from(items).slice(0, 5).map(item => ({
+                title: item.querySelector('title')?.textContent || 'No title',
+                link: item.querySelector('link')?.textContent || '#',
+                description: item.querySelector('description')?.textContent || 'No description',
+                pubDate: item.querySelector('pubDate')?.textContent || ''
+            }));
+            
+            feed.lastUpdated = new Date().toISOString();
+            saveData();
+            renderNews();
+        })
+        .catch(error => {
+            console.error('Error fetching RSS feed:', error);
+            // Add demo data
+            feed.articles = [
+                {
+                    title: 'Demo Article 1',
+                    link: '#',
+                    description: 'This is a demo article for testing.',
+                    pubDate: new Date().toISOString()
+                }
+            ];
+            saveData();
+            renderNews();
+        });
+}
+
+function renderNews() {
+    const container = document.getElementById('newsContainer');
+    
+    if (newsFeeds.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-newspaper"></i>
+                <h3>No RSS feeds yet</h3>
+                <p>Add your first RSS feed to get started!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    newsFeeds.forEach(feed => {
+        html += `
+            <div class="news-feed">
+                <div class="feed-header">
+                    <h3>${feed.name}</h3>
+                    <button onclick="deleteNewsFeed(${feed.id})" class="delete-btn">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="feed-articles">
+                    ${feed.articles.map(article => `
+                        <div class="article">
+                            <a href="${article.link}" target="_blank" class="article-title">
+                                ${article.title}
+                            </a>
+                            <div class="article-description">${article.description}</div>
+                            <div class="article-date">${new Date(article.pubDate).toLocaleDateString()}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function deleteNewsFeed(id) {
+    if (confirm('Delete this RSS feed?')) {
+        newsFeeds = newsFeeds.filter(feed => feed.id !== id);
+        saveData();
+        renderNews();
+    }
+}
+
+function refreshNews() {
+    newsFeeds.forEach(feed => {
+        fetchRSSFeed(feed.id);
+    });
+}
+
+// AI Chat functions
+function sendAIMessage() {
+    const input = document.getElementById('aiChatInput');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    // Add user message
+    aiChatHistory.push({
+        role: 'user',
+        content: message,
+        timestamp: new Date().toISOString()
+    });
+    
+    input.value = '';
+    renderAIChat();
+    
+    // Simulate AI response (replace with actual Gemini API)
+    setTimeout(() => {
+        const response = `This is a demo response. To integrate with Gemini, you'll need to add your API key and implement the actual API calls. For now, this simulates an AI response to: "${message}"`;
+        
+        aiChatHistory.push({
+            role: 'assistant',
+            content: response,
+            timestamp: new Date().toISOString()
+        });
+        
+        saveData();
+        renderAIChat();
+    }, 1000);
+}
+
+function renderAIChat() {
+    const container = document.getElementById('chatMessages');
+    
+    if (aiChatHistory.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-robot"></i>
+                <h3>No messages yet</h3>
+                <p>Start a conversation with Gemini!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    aiChatHistory.forEach(message => {
+        const isUser = message.role === 'user';
+        const time = new Date(message.timestamp).toLocaleTimeString();
+        
+        html += `
+            <div class="chat-message ${isUser ? 'user' : 'ai'}">
+                <div class="message-content">
+                    <div class="message-text">${message.content}</div>
+                    <div class="message-time">${time}</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+    container.scrollTop = container.scrollHeight;
+}
+
+function clearAIChat() {
+    if (confirm('Clear all chat messages?')) {
+        aiChatHistory = [];
+        saveData();
+        renderAIChat();
+    }
 }
 
 // Add sample data on first load if no data exists

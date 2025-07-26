@@ -9,39 +9,80 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Fira+Code:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&family=Roboto:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Theme Controls -->
-    <div class="theme-controls">
-        <label for="themeSelect">Theme:</label>
-        <select id="themeSelect" onchange="changeTheme(this.value)">
-            <option value="cyberpunk">Cyberpunk</option>
-            <option value="matrix">Matrix</option>
-            <option value="neon-purple">Neon Purple</option>
-            <option value="cyber-orange">Cyber Orange</option>
-            <option value="deep-blue">Deep Blue</option>
-            <option value="dark-green">Dark Green</option>
-        </select>
-        
-        <label for="fontSelect">Font:</label>
-        <select id="fontSelect" onchange="changeFont(this.value)">
-            <option value="mono">JetBrains Mono</option>
-            <option value="code">Fira Code</option>
-            <option value="consolas">Consolas</option>
-            <option value="cascadia">Cascadia Code</option>
-            <option value="source">Source Code Pro</option>
-            <option value="roboto">Roboto</option>
-            <option value="inter">Inter</option>
-            <option value="system">System</option>
-        </select>
-    </div>
-
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
-            <div class="weather-widget" id="weatherWidget">
-                <i class="fas fa-spinner fa-spin"></i> Loading weather...
+            <div class="header-left">
+                <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <div class="weather-widget" id="weatherWidget">
+                    <i class="fas fa-spinner fa-spin"></i> Loading weather...
+                </div>
+                <button class="menu-toggle" onclick="toggleSideMenu()">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </header>
+
+        <!-- Side Menu -->
+        <div class="side-menu" id="sideMenu">
+            <div class="side-menu-header">
+                <h3><i class="fas fa-cog"></i> Settings</h3>
+                <button class="close-menu" onclick="toggleSideMenu()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="side-menu-content">
+                <div class="menu-section">
+                    <h4><i class="fas fa-palette"></i> Appearance</h4>
+                    <div class="theme-group">
+                        <label for="themeSelect">Theme:</label>
+                        <select id="themeSelect" onchange="changeTheme(this.value)">
+                            <option value="cyberpunk">Cyberpunk</option>
+                            <option value="matrix">Matrix</option>
+                            <option value="neon-purple">Neon Purple</option>
+                            <option value="cyber-orange">Cyber Orange</option>
+                            <option value="deep-blue">Deep Blue</option>
+                            <option value="dark-green">Dark Green</option>
+                        </select>
+                    </div>
+                    <div class="theme-group">
+                        <label for="fontSelect">Font:</label>
+                        <select id="fontSelect" onchange="changeFont(this.value)">
+                            <option value="mono">JetBrains Mono</option>
+                            <option value="code">Fira Code</option>
+                            <option value="consolas">Consolas</option>
+                            <option value="cascadia">Cascadia Code</option>
+                            <option value="source">Source Code Pro</option>
+                            <option value="roboto">Roboto</option>
+                            <option value="inter">Inter</option>
+                            <option value="system">System</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="menu-section">
+                    <h4><i class="fas fa-database"></i> Data Management</h4>
+                    <button onclick="backupData()" class="menu-btn">
+                        <i class="fas fa-download"></i> Backup All Data
+                    </button>
+                    <button onclick="loadData()" class="menu-btn">
+                        <i class="fas fa-upload"></i> Load Backup
+                    </button>
+                </div>
+                
+                <div class="menu-section">
+                    <h4><i class="fas fa-info-circle"></i> About</h4>
+                    <p class="menu-info">Dashboard v2.0</p>
+                    <p class="menu-info">Your personal portal</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Overlay -->
+        <div class="menu-overlay" id="menuOverlay" onclick="toggleSideMenu()"></div>
 
         <!-- Search Bar -->
         <div class="search-section">
@@ -72,6 +113,15 @@
             <button class="tab-btn" onclick="showTab('notes')">
                 <i class="fas fa-sticky-note"></i> Notes
             </button>
+            <button class="tab-btn" onclick="showTab('stocks')">
+                <i class="fas fa-chart-line"></i> Stocks
+            </button>
+            <button class="tab-btn" onclick="showTab('news')">
+                <i class="fas fa-newspaper"></i> News
+            </button>
+            <button class="tab-btn" onclick="showTab('ai')">
+                <i class="fas fa-robot"></i> AI Chat
+            </button>
         </div>
 
         <!-- Bookmarks Tab -->
@@ -85,14 +135,11 @@
                     <button onclick="toggleEditMode()" class="btn btn-secondary" id="editModeBtn">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button onclick="importBookmarks()" class="btn btn-secondary">
-                        <i class="fas fa-download"></i> Import
+                    <button onclick="backupData()" class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Backup
                     </button>
-                    <button onclick="exportBookmarks()" class="btn btn-secondary">
-                        <i class="fas fa-upload"></i> Export
-                    </button>
-                    <button onclick="enableGoogleDriveSync()" class="btn btn-secondary" title="Enable Google Drive Sync">
-                        <i class="fab fa-google-drive"></i> Sync
+                    <button onclick="loadData()" class="btn btn-secondary">
+                        <i class="fas fa-upload"></i> Load
                     </button>
                 </div>
             </div>
@@ -115,6 +162,15 @@
                 </div>
             </div>
             
+            <!-- Quick Add Bookmark -->
+            <div class="quick-add-bookmark">
+                <input type="text" id="quickBookmarkTitle" placeholder="Bookmark title..." class="quick-input">
+                <input type="url" id="quickBookmarkUrl" placeholder="URL..." class="quick-input">
+                <button onclick="quickAddBookmark()" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Quick Add
+                </button>
+            </div>
+            
             <div class="bookmarks-container" id="bookmarksContainer">
                 <!-- Bookmarks will be loaded here -->
             </div>
@@ -124,13 +180,83 @@
         <div id="notes" class="tab-content">
             <div class="section-header">
                 <h2>Notes</h2>
-                <button onclick="showAddNoteModal()" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Add Note
-                </button>
+                <div class="action-buttons">
+                    <button onclick="showAddNoteModal()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Note
+                    </button>
+                    <button onclick="backupData()" class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Backup
+                    </button>
+                    <button onclick="loadData()" class="btn btn-secondary">
+                        <i class="fas fa-upload"></i> Load
+                    </button>
+                </div>
             </div>
             
             <div class="notes-container" id="notesContainer">
                 <!-- Notes will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Stocks Tab -->
+        <div id="stocks" class="tab-content">
+            <div class="section-header">
+                <h2>Stock Tickers</h2>
+                <div class="action-buttons">
+                    <button onclick="addStockTicker()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Ticker
+                    </button>
+                    <button onclick="refreshStocks()" class="btn btn-secondary">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div class="stocks-container" id="stocksContainer">
+                <!-- Stock tickers will be loaded here -->
+            </div>
+        </div>
+
+        <!-- News Tab -->
+        <div id="news" class="tab-content">
+            <div class="section-header">
+                <h2>RSS News Feed</h2>
+                <div class="action-buttons">
+                    <button onclick="addRSSFeed()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Feed
+                    </button>
+                    <button onclick="refreshNews()" class="btn btn-secondary">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div class="news-container" id="newsContainer">
+                <!-- News feeds will be loaded here -->
+            </div>
+        </div>
+
+        <!-- AI Chat Tab -->
+        <div id="ai" class="tab-content">
+            <div class="section-header">
+                <h2>AI Chat (Gemini)</h2>
+                <div class="action-buttons">
+                    <button onclick="clearAIChat()" class="btn btn-secondary">
+                        <i class="fas fa-trash"></i> Clear Chat
+                    </button>
+                </div>
+            </div>
+            
+            <div class="ai-chat-container" id="aiChatContainer">
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Chat messages will appear here -->
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="aiChatInput" placeholder="Ask Gemini anything..." class="chat-input">
+                    <button onclick="sendAIMessage()" class="chat-send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
