@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Fira+Code:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&family=Roboto:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Theme Controls -->
+    <div class="theme-controls">
+        <label for="themeSelect">Theme:</label>
+        <select id="themeSelect" onchange="changeTheme(this.value)">
+            <option value="cyberpunk">Cyberpunk</option>
+            <option value="matrix">Matrix</option>
+            <option value="neon-purple">Neon Purple</option>
+            <option value="cyber-orange">Cyber Orange</option>
+            <option value="deep-blue">Deep Blue</option>
+            <option value="dark-green">Dark Green</option>
+        </select>
+        
+        <label for="fontSelect">Font:</label>
+        <select id="fontSelect" onchange="changeFont(this.value)">
+            <option value="mono">JetBrains Mono</option>
+            <option value="code">Fira Code</option>
+            <option value="consolas">Consolas</option>
+            <option value="cascadia">Cascadia Code</option>
+            <option value="source">Source Code Pro</option>
+            <option value="roboto">Roboto</option>
+            <option value="inter">Inter</option>
+            <option value="system">System</option>
+        </select>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+            <div class="weather-widget" id="weatherWidget">
+                <i class="fas fa-info-circle"></i> Weather requires internet connection
+            </div>
+        </header>
+
+        <!-- Search Bar -->
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search the web..." class="search-input">
+                <div class="search-buttons">
+                    <button onclick="search('google')" class="search-btn google-btn">
+                        <i class="fab fa-google"></i> Google
+                    </button>
+                    <button onclick="search('youtube')" class="search-btn youtube-btn">
+                        <i class="fab fa-youtube"></i> YouTube
+                    </button>
+                    <button onclick="search('twitter')" class="search-btn twitter-btn">
+                        <i class="fab fa-twitter"></i> X
+                    </button>
+                    <button onclick="search('tiktok')" class="search-btn tiktok-btn">
+                        <i class="fab fa-tiktok"></i> TikTok
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('bookmarks')">
+                <i class="fas fa-bookmark"></i> Bookmarks
+            </button>
+            <button class="tab-btn" onclick="showTab('notes')">
+                <i class="fas fa-sticky-note"></i> Notes
+            </button>
+        </div>
+
+        <!-- Bookmarks Tab -->
+        <div id="bookmarks" class="tab-content active">
+            <div class="section-header">
+                <h2>Bookmarks</h2>
+                <div class="action-buttons">
+                    <button onclick="showAddBookmarkModal()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add
+                    </button>
+                    <button onclick="toggleEditMode()" class="btn btn-secondary" id="editModeBtn">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button onclick="importBookmarks()" class="btn btn-secondary">
+                        <i class="fas fa-download"></i> Import
+                    </button>
+                    <button onclick="exportBookmarks()" class="btn btn-secondary">
+                        <i class="fas fa-upload"></i> Export
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Edit Mode Controls -->
+            <div class="edit-mode-controls" id="editModeControls">
+                <div class="left-controls">
+                    <button onclick="selectAllBookmarks()" class="select-all-btn">
+                        <i class="fas fa-check-square"></i> Select All
+                    </button>
+                    <span class="selected-count" id="selectedCount">0 selected</span>
+                </div>
+                <div class="right-controls">
+                    <button onclick="bulkDeleteBookmarks()" class="bulk-delete-btn">
+                        <i class="fas fa-trash"></i> Delete Selected
+                    </button>
+                    <button onclick="toggleEditMode()" class="cancel-edit-btn">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bookmarks-container" id="bookmarksContainer">
+                <!-- Bookmarks will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Notes Tab -->
+        <div id="notes" class="tab-content">
+            <div class="section-header">
+                <h2>Notes</h2>
+                <button onclick="showAddNoteModal()" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Note
+                </button>
+            </div>
+            
+            <div class="notes-container" id="notesContainer">
+                <!-- Notes will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Bookmark Modal -->
+    <div id="addBookmarkModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addBookmarkModal')">&times;</span>
+            <h3>Add New Bookmark</h3>
+            <form id="addBookmarkForm">
+                <div class="form-group">
+                    <label for="bookmarkTitle">Title:</label>
+                    <input type="text" id="bookmarkTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="bookmarkUrl">URL:</label>
+                    <input type="url" id="bookmarkUrl" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Bookmark</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addBookmarkModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Note Modal -->
+    <div id="addNoteModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addNoteModal')">&times;</span>
+            <h3>Add New Note</h3>
+            <form id="addNoteForm">
+                <div class="form-group">
+                    <label for="noteTitle">Title:</label>
+                    <input type="text" id="noteTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="noteContent">Content:</label>
+                    <textarea id="noteContent" rows="6" required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Note</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addNoteModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Note Modal -->
+    <div id="editNoteModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editNoteModal')">&times;</span>
+            <h3>Edit Note</h3>
+            <form id="editNoteForm">
+                <input type="hidden" id="editNoteId">
+                <div class="form-group">
+                    <label for="editNoteTitle">Title:</label>
+                    <input type="text" id="editNoteTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="editNoteContent">Content:</label>
+                    <textarea id="editNoteContent" rows="6" required></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Update Note</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editNoteModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="s24-simple.js"></script>
+</body>
+</html> 
