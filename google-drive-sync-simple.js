@@ -193,4 +193,4 @@ class GoogleDriveSyncSimple {
 }
 
 // Export for use in main script
-window.GoogleDriveSyncSimple = GoogleDriveSyncSimple;
+window.GoogleDriveSyncSimple = GoogleDriveSyncSimple; 
