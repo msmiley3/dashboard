@@ -383,18 +383,47 @@ function addBookmark() {
     };
     
     bookmarks.push(bookmark);
-    localStorage.setItem('dashboardBookmarks', JSON.stringify(bookmarks));
     
-    titleInput.value = '';
-    urlInput.value = '';
-    
-    renderBookmarks();
+    // Auto-save with backup and feedback
+    try {
+        localStorage.setItem('dashboardBookmarks', JSON.stringify(bookmarks));
+        localStorage.setItem('dashboardBookmarksBackup', JSON.stringify(bookmarks));
+        localStorage.setItem('dashboardBookmarksTimestamp', Date.now().toString());
+        
+        titleInput.value = '';
+        urlInput.value = '';
+        renderBookmarks();
+        showSaveSuccess('bookmarks');
+        showNotification(`Bookmark "${title}" added and saved!`, 'success');
+        console.log('🔖 Bookmark auto-saved');
+    } catch (error) {
+        console.error('❌ Failed to save bookmark:', error);
+        showSaveError('bookmarks');
+        showNotification('Failed to save bookmark', 'error');
+    }
 }
 
 function deleteBookmark(id) {
-    bookmarks = bookmarks.filter(bookmark => bookmark.id !== id);
-    localStorage.setItem('dashboardBookmarks', JSON.stringify(bookmarks));
-    renderBookmarks();
+    const bookmarkIndex = bookmarks.findIndex(bookmark => bookmark.id === id);
+    if (bookmarkIndex > -1) {
+        const deletedBookmark = bookmarks[bookmarkIndex];
+        bookmarks.splice(bookmarkIndex, 1);
+        
+        // Auto-save with backup and feedback
+        try {
+            localStorage.setItem('dashboardBookmarks', JSON.stringify(bookmarks));
+            localStorage.setItem('dashboardBookmarksBackup', JSON.stringify(bookmarks));
+            localStorage.setItem('dashboardBookmarksTimestamp', Date.now().toString());
+            
+            renderBookmarks();
+            showSaveSuccess('bookmarks');
+            showNotification(`Bookmark "${deletedBookmark.title}" deleted!`, 'success');
+            console.log('🔖 Bookmark deleted and saved');
+        } catch (error) {
+            console.error('❌ Failed to save after bookmark deletion:', error);
+            showSaveError('bookmarks');
+        }
+    }
 }
 
 function renderBookmarks() {
@@ -440,25 +469,69 @@ function addTodo() {
     };
     
     todos.push(todo);
-    localStorage.setItem('dashboardTodos', JSON.stringify(todos));
     
-    todoInput.value = '';
-    renderTodos();
+    // Auto-save with backup and feedback
+    try {
+        localStorage.setItem('dashboardTodos', JSON.stringify(todos));
+        localStorage.setItem('dashboardTodosBackup', JSON.stringify(todos));
+        localStorage.setItem('dashboardTodosTimestamp', Date.now().toString());
+        
+        todoInput.value = '';
+        renderTodos();
+        showSaveSuccess('todos');
+        showNotification(`Task "${text}" added and saved!`, 'success');
+        console.log('✅ Todo auto-saved');
+    } catch (error) {
+        console.error('❌ Failed to save todo:', error);
+        showSaveError('todos');
+        showNotification('Failed to save task', 'error');
+    }
 }
 
 function toggleTodo(id) {
     const todo = todos.find(t => t.id === id);
     if (todo) {
         todo.completed = !todo.completed;
-        localStorage.setItem('dashboardTodos', JSON.stringify(todos));
-        renderTodos();
+        todo.modified = new Date().toISOString();
+        
+        // Auto-save with backup and feedback
+        try {
+            localStorage.setItem('dashboardTodos', JSON.stringify(todos));
+            localStorage.setItem('dashboardTodosBackup', JSON.stringify(todos));
+            localStorage.setItem('dashboardTodosTimestamp', Date.now().toString());
+            
+            renderTodos();
+            showSaveSuccess('todos');
+            showNotification(`Task ${todo.completed ? 'completed' : 'reopened'}!`, 'success');
+            console.log('✅ Todo status auto-saved');
+        } catch (error) {
+            console.error('❌ Failed to save todo status:', error);
+            showSaveError('todos');
+        }
     }
 }
 
 function deleteTodo(id) {
-    todos = todos.filter(todo => todo.id !== id);
-    localStorage.setItem('dashboardTodos', JSON.stringify(todos));
-    renderTodos();
+    const todoIndex = todos.findIndex(todo => todo.id === id);
+    if (todoIndex > -1) {
+        const deletedTodo = todos[todoIndex];
+        todos.splice(todoIndex, 1);
+        
+        // Auto-save with backup and feedback
+        try {
+            localStorage.setItem('dashboardTodos', JSON.stringify(todos));
+            localStorage.setItem('dashboardTodosBackup', JSON.stringify(todos));
+            localStorage.setItem('dashboardTodosTimestamp', Date.now().toString());
+            
+            renderTodos();
+            showSaveSuccess('todos');
+            showNotification(`Task "${deletedTodo.text}" deleted!`, 'success');
+            console.log('✅ Todo deleted and saved');
+        } catch (error) {
+            console.error('❌ Failed to save after todo deletion:', error);
+            showSaveError('todos');
+        }
+    }
 }
 
 function renderTodos() {
@@ -643,13 +716,219 @@ function debounce(func, wait) {
 // Debounced auto-save for notes
 const debouncedAutoSave = debounce(autoSaveNotes, 1000);
 
-// Replace the direct auto-save listener with debounced version
+// Enhanced Auto-Save Configuration
+const AUTO_SAVE_CONFIG = {
+    debounceDelay: 500, // Save after 500ms of no typing
+    showSaveIndicator: true
+};
+
+let autoSaveTimers = {};
+let saveIndicators = {};
+
+// Replace the direct auto-save listener with enhanced version
 document.addEventListener('DOMContentLoaded', function() {
+    setupEnhancedAutoSave();
+    showAutoSaveStatus();
+});
+
+function setupEnhancedAutoSave() {
+    console.log('🔄 Initializing enhanced auto-save...');
+    
+    // Enhanced notes auto-save
     const notesTextarea = document.getElementById('quickNotes');
     if (notesTextarea) {
-        notesTextarea.addEventListener('input', debouncedAutoSave);
+        // Auto-save on input with debouncing and visual feedback
+        notesTextarea.addEventListener('input', function() {
+            clearTimeout(autoSaveTimers.notes);
+            showSavingIndicator('notes');
+            
+            autoSaveTimers.notes = setTimeout(() => {
+                autoSaveNotesEnhanced();
+            }, AUTO_SAVE_CONFIG.debounceDelay);
+        });
+        
+        // Save on focus loss
+        notesTextarea.addEventListener('blur', function() {
+            autoSaveNotesEnhanced();
+        });
+        
+        // Save on Ctrl+S
+        notesTextarea.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                autoSaveNotesEnhanced();
+                showSaveSuccess('notes');
+            }
+        });
     }
-});
+    
+    // Periodic backup every 30 seconds
+    setInterval(performPeriodicBackup, 30000);
+    
+    // Emergency backup on page unload
+    window.addEventListener('beforeunload', performEmergencyBackup);
+    
+    console.log('✅ Enhanced auto-save initialized!');
+}
+
+function autoSaveNotesEnhanced() {
+    const notesTextarea = document.getElementById('quickNotes');
+    if (!notesTextarea) return;
+    
+    try {
+        const currentNotes = notesTextarea.value;
+        
+        // Only save if content changed
+        if (currentNotes !== notes) {
+            notes = currentNotes;
+            localStorage.setItem('dashboardNotes', notes);
+            localStorage.setItem('dashboardNotesBackup', notes);
+            localStorage.setItem('dashboardNotesTimestamp', Date.now().toString());
+            
+            showSaveSuccess('notes');
+            console.log('📝 Notes auto-saved');
+        }
+    } catch (error) {
+        console.error('❌ Failed to save notes:', error);
+        showSaveError('notes');
+    }
+}
+
+// Save indicators
+function showSavingIndicator(type) {
+    if (!AUTO_SAVE_CONFIG.showSaveIndicator) return;
+    
+    const indicator = getSaveIndicator(type);
+    indicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    indicator.className = 'save-indicator saving';
+    indicator.style.opacity = '1';
+}
+
+function showSaveSuccess(type) {
+    if (!AUTO_SAVE_CONFIG.showSaveIndicator) return;
+    
+    const indicator = getSaveIndicator(type);
+    indicator.innerHTML = '<i class="fas fa-check"></i> Saved';
+    indicator.className = 'save-indicator success';
+    indicator.style.opacity = '1';
+    
+    setTimeout(() => {
+        indicator.style.opacity = '0';
+    }, 2000);
+}
+
+function showSaveError(type) {
+    if (!AUTO_SAVE_CONFIG.showSaveIndicator) return;
+    
+    const indicator = getSaveIndicator(type);
+    indicator.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Save Failed';
+    indicator.className = 'save-indicator error';
+    indicator.style.opacity = '1';
+    
+    setTimeout(() => {
+        indicator.style.opacity = '0';
+    }, 3000);
+}
+
+function getSaveIndicator(type) {
+    if (!saveIndicators[type]) {
+        const indicator = document.createElement('div');
+        indicator.className = 'save-indicator';
+        indicator.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+            background: var(--success-color);
+            color: white;
+        `;
+        
+        // Find the appropriate widget
+        let widget;
+        switch(type) {
+            case 'notes':
+                widget = document.querySelector('.notes-widget');
+                break;
+            case 'bookmarks':
+                widget = document.querySelector('.bookmarks-widget');
+                break;
+            case 'todos':
+                widget = document.querySelector('.todo-widget');
+                break;
+        }
+        
+        if (widget) {
+            widget.style.position = 'relative';
+            widget.appendChild(indicator);
+        }
+        
+        saveIndicators[type] = indicator;
+    }
+    
+    return saveIndicators[type];
+}
+
+// Periodic backup
+function performPeriodicBackup() {
+    try {
+        const backup = {
+            notes: notes,
+            bookmarks: bookmarks,
+            todos: todos,
+            timestamp: Date.now(),
+            version: '1.0'
+        };
+        
+        localStorage.setItem('dashboardFullBackup', JSON.stringify(backup));
+        console.log('💾 Periodic backup completed');
+    } catch (error) {
+        console.error('❌ Periodic backup failed:', error);
+    }
+}
+
+// Emergency backup on page unload
+function performEmergencyBackup() {
+    try {
+        const notesTextarea = document.getElementById('quickNotes');
+        if (notesTextarea) {
+            localStorage.setItem('dashboardNotes', notesTextarea.value);
+        }
+        
+        localStorage.setItem('dashboardBookmarks', JSON.stringify(bookmarks));
+        localStorage.setItem('dashboardTodos', JSON.stringify(todos));
+        
+        console.log('🚨 Emergency backup completed');
+    } catch (error) {
+        console.error('❌ Emergency backup failed:', error);
+    }
+}
+
+// Auto-save status indicator
+function showAutoSaveStatus() {
+    const headerInfo = document.querySelector('.header-info');
+    if (headerInfo) {
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'autosave-status';
+        statusDiv.innerHTML = '<i class="fas fa-save"></i> Auto-save: ON';
+        statusDiv.style.cssText = `
+            font-size: 11px;
+            color: var(--success-color);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            animation: pulse 2s infinite;
+        `;
+        headerInfo.appendChild(statusDiv);
+    }
+}
 
 // Export functions for global access
 window.appendToCalculator = appendToCalculator;
