@@ -1,0 +1,200 @@
+<!-- AI Integration Widgets for Dashboard -->
+<!-- Add these widgets to your index.html in the widgets-grid section -->
+
+<!-- AI Chat Widget (Gemini Integration) -->
+<div class="widget ai-chat-widget">
+    <h3 class="widget-title">
+        <i class="fas fa-robot"></i>
+        AI Assistant (Gemini)
+    </h3>
+    <div class="ai-chat-content">
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-message ai-message">
+                <i class="fas fa-robot"></i>
+                <span>Hi! I'm your AI assistant. Ask me anything or request help with coding!</span>
+            </div>
+        </div>
+        <div class="chat-input-container">
+            <input type="text" id="aiChatInput" placeholder="Ask Gemini anything..." class="chat-input">
+            <button id="sendChatBtn" class="chat-send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+        <div class="ai-settings">
+            <input type="password" id="geminiApiKey" placeholder="Enter Gemini API Key (optional)" class="api-key-input">
+            <button id="saveApiKey" class="btn btn-secondary btn-small">Save Key</button>
+            <small class="api-help">Get your free API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></small>
+        </div>
+    </div>
+</div>
+
+<!-- Cursor Integration Widget -->
+<div class="widget cursor-widget">
+    <h3 class="widget-title">
+        <i class="fas fa-code"></i>
+        Cursor Integration
+    </h3>
+    <div class="cursor-content">
+        <div class="cursor-actions">
+            <button class="cursor-action-btn" onclick="openCursorProject()">
+                <i class="fas fa-folder-open"></i>
+                <span>Open Project</span>
+            </button>
+            <button class="cursor-action-btn" onclick="createNewFile()">
+                <i class="fas fa-file-plus"></i>
+                <span>New File</span>
+            </button>
+            <button class="cursor-action-btn" onclick="runCursorCommand()">
+                <i class="fas fa-terminal"></i>
+                <span>Run Command</span>
+            </button>
+            <button class="cursor-action-btn" onclick="openCursorDocs()">
+                <i class="fas fa-book"></i>
+                <span>Cursor Docs</span>
+            </button>
+        </div>
+        <div class="code-snippet-container">
+            <textarea id="codeSnippet" placeholder="Write or paste code here..." class="code-textarea"></textarea>
+            <div class="code-actions">
+                <button id="analyzeCode" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Analyze with AI
+                </button>
+                <button id="improveCode" class="btn btn-secondary">
+                    <i class="fas fa-magic"></i> Improve Code
+                </button>
+                <button id="copyCode" class="btn btn-secondary">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
+                <button id="openInCursor" class="btn btn-secondary">
+                    <i class="fas fa-external-link-alt"></i> Open in Cursor
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Productivity Widget -->
+<div class="widget ai-productivity-widget">
+    <h3 class="widget-title">
+        <i class="fas fa-brain"></i>
+        AI Productivity
+    </h3>
+    <div class="productivity-content">
+        <div class="productivity-tabs">
+            <button class="tab-btn active" data-tab="summarize">Summarize</button>
+            <button class="tab-btn" data-tab="translate">Translate</button>
+            <button class="tab-btn" data-tab="generate">Generate</button>
+            <button class="tab-btn" data-tab="code-help">Code Help</button>
+        </div>
+        
+        <div class="tab-content active" id="summarize-tab">
+            <textarea id="textToSummarize" placeholder="Paste text to summarize..." class="productivity-textarea"></textarea>
+            <button id="summarizeText" class="btn btn-primary">
+                <i class="fas fa-compress-alt"></i> Summarize
+            </button>
+            <div id="summaryResult" class="result-area"></div>
+        </div>
+        
+        <div class="tab-content" id="translate-tab">
+            <div class="translate-controls">
+                <select id="translateFrom" class="translate-select">
+                    <option value="auto">Auto-detect</option>
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ko">Korean</option>
+                    <option value="zh">Chinese</option>
+                </select>
+                <i class="fas fa-arrow-right"></i>
+                <select id="translateTo" class="translate-select">
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ko">Korean</option>
+                    <option value="zh">Chinese</option>
+                </select>
+            </div>
+            <textarea id="textToTranslate" placeholder="Enter text to translate..." class="productivity-textarea"></textarea>
+            <button id="translateText" class="btn btn-primary">
+                <i class="fas fa-language"></i> Translate
+            </button>
+            <div id="translationResult" class="result-area"></div>
+        </div>
+        
+        <div class="tab-content" id="generate-tab">
+            <select id="generateType" class="generate-select">
+                <option value="email">Email</option>
+                <option value="code">Code</option>
+                <option value="essay">Essay</option>
+                <option value="list">List</option>
+                <option value="creative">Creative Writing</option>
+                <option value="documentation">Documentation</option>
+            </select>
+            <textarea id="generatePrompt" placeholder="Describe what you want to generate..." class="productivity-textarea"></textarea>
+            <button id="generateContent" class="btn btn-primary">
+                <i class="fas fa-magic"></i> Generate
+            </button>
+            <div id="generateResult" class="result-area"></div>
+        </div>
+        
+        <div class="tab-content" id="code-help-tab">
+            <select id="codeLanguage" class="code-language-select">
+                <option value="javascript">JavaScript</option>
+                <option value="python">Python</option>
+                <option value="html">HTML</option>
+                <option value="css">CSS</option>
+                <option value="react">React</option>
+                <option value="node">Node.js</option>
+                <option value="sql">SQL</option>
+            </select>
+            <textarea id="codeQuestion" placeholder="Ask a coding question or paste code for help..." class="productivity-textarea"></textarea>
+            <button id="getCodeHelp" class="btn btn-primary">
+                <i class="fas fa-question-circle"></i> Get Help
+            </button>
+            <div id="codeHelpResult" class="result-area"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick AI Actions Widget -->
+<div class="widget quick-ai-widget">
+    <h3 class="widget-title">
+        <i class="fas fa-bolt"></i>
+        Quick AI Actions
+    </h3>
+    <div class="quick-ai-content">
+        <div class="quick-ai-buttons">
+            <button class="quick-ai-btn" onclick="explainCode()">
+                <i class="fas fa-lightbulb"></i>
+                <span>Explain Code</span>
+            </button>
+            <button class="quick-ai-btn" onclick="debugCode()">
+                <i class="fas fa-bug"></i>
+                <span>Debug Code</span>
+            </button>
+            <button class="quick-ai-btn" onclick="optimizeCode()">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Optimize</span>
+            </button>
+            <button class="quick-ai-btn" onclick="generateTests()">
+                <i class="fas fa-vial"></i>
+                <span>Generate Tests</span>
+            </button>
+            <button class="quick-ai-btn" onclick="addComments()">
+                <i class="fas fa-comment-dots"></i>
+                <span>Add Comments</span>
+            </button>
+            <button class="quick-ai-btn" onclick="convertCode()">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Convert Language</span>
+            </button>
+        </div>
+        <div class="ai-output" id="quickAiOutput">
+            <p class="placeholder-text">Select an action above to get AI assistance</p>
+        </div>
+    </div>
+</div>
