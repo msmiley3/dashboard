@@ -19,13 +19,69 @@
                 <div class="weather-widget" id="weatherWidget">
                     <i class="fas fa-spinner fa-spin"></i> Loading weather...
                 </div>
-                <button class="menu-toggle" onclick="toggleSideMenu()">
+                <button class="menu-toggle" onclick="toggleMenu()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
         </header>
 
-        <!-- Side Menu -->
+        <!-- Mobile Sidebar -->
+        <div class="mobile-sidebar" id="mobileSidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-cog"></i> Settings</h3>
+                <button class="close-sidebar" onclick="toggleMobileSidebar()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="sidebar-section">
+                    <h4><i class="fas fa-palette"></i> Appearance</h4>
+                    <div class="setting-group">
+                        <label for="themeSelect">Theme:</label>
+                        <select id="themeSelect" onchange="changeTheme(this.value)">
+                            <option value="cyberpunk">Cyberpunk</option>
+                            <option value="matrix">Matrix</option>
+                            <option value="neon-purple">Neon Purple</option>
+                            <option value="cyber-orange">Cyber Orange</option>
+                            <option value="deep-blue">Deep Blue</option>
+                            <option value="dark-green">Dark Green</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="fontSelect">Font:</label>
+                        <select id="fontSelect" onchange="changeFont(this.value)">
+                            <option value="mono">JetBrains Mono</option>
+                            <option value="code">Fira Code</option>
+                            <option value="consolas">Consolas</option>
+                            <option value="cascadia">Cascadia Code</option>
+                            <option value="source">Source Code Pro</option>
+                            <option value="roboto">Roboto</option>
+                            <option value="inter">Inter</option>
+                            <option value="system">System</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h4><i class="fas fa-database"></i> Data Management</h4>
+                    <button onclick="backupData()" class="sidebar-btn">
+                        <i class="fas fa-download"></i> Backup All Data
+                    </button>
+                    <button onclick="loadData()" class="sidebar-btn">
+                        <i class="fas fa-upload"></i> Load Backup
+                    </button>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h4><i class="fas fa-info-circle"></i> About</h4>
+                    <p class="sidebar-info">Dashboard v2.0</p>
+                    <p class="sidebar-info">Your personal portal</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop Side Menu (hidden on mobile) -->
         <div class="side-menu" id="sideMenu">
             <div class="side-menu-header">
                 <h3><i class="fas fa-cog"></i> Settings</h3>

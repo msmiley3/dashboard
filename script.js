@@ -390,6 +390,7 @@ function setupEventListeners() {
 
 // Side menu functions
 function toggleSideMenu() {
+    // Desktop side menu
     const sideMenu = document.getElementById('sideMenu');
     const menuOverlay = document.getElementById('menuOverlay');
     
@@ -401,6 +402,31 @@ function toggleSideMenu() {
         sideMenu.classList.add('active');
         menuOverlay.classList.add('active');
         document.body.style.overflow = 'hidden';
+    }
+}
+
+function toggleMobileSidebar() {
+    // Mobile sidebar
+    const mobileSidebar = document.getElementById('mobileSidebar');
+    const menuOverlay = document.getElementById('menuOverlay');
+    
+    if (mobileSidebar.classList.contains('active')) {
+        mobileSidebar.classList.remove('active');
+        menuOverlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    } else {
+        mobileSidebar.classList.add('active');
+        menuOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+// Update the menu toggle to use mobile sidebar on mobile devices
+function toggleMenu() {
+    if (window.innerWidth <= 768) {
+        toggleMobileSidebar();
+    } else {
+        toggleSideMenu();
     }
 }
 
@@ -1117,22 +1143,70 @@ function fetchRSSFeed(feedId) {
     const feed = newsFeeds.find(f => f.id === feedId);
     if (!feed) return;
     
-    // Using a CORS proxy to fetch RSS feeds
-    const proxyUrl = 'https://api.allorigins.win/raw?url=';
-    const url = proxyUrl + encodeURIComponent(feed.url);
+    // Try multiple CORS proxies for better reliability
+    const proxies = [
+        'https://api.allorigins.win/raw?url=',
+        'https://cors-anywhere.herokuapp.com/',
+        'https://thingproxy.freeboard.io/fetch/'
+    ];
     
-    fetch(url)
-        .then(response => response.text())
+    let currentProxy = 0;
+    
+    function tryProxy() {
+        if (currentProxy >= proxies.length) {
+            // All proxies failed, use demo data
+            feed.articles = [
+                {
+                    title: 'Demo Article 1',
+                    link: '#',
+                    description: 'This is a demo article for testing. RSS feeds require a working CORS proxy.',
+                    pubDate: new Date().toISOString()
+                },
+                {
+                    title: 'Demo Article 2',
+                    link: '#',
+                    description: 'Try adding popular RSS feeds like: https://feeds.bbci.co.uk/news/rss.xml',
+                    pubDate: new Date().toISOString()
+                }
+            ];
+            saveData();
+            renderNews();
+            return;
+        }
+        
+        const proxyUrl = proxies[currentProxy];
+        const url = proxyUrl + encodeURIComponent(feed.url);
+        
+        fetch(url, { 
+            method: 'GET',
+            headers: {
+                'Accept': 'application/rss+xml, application/xml, text/xml, */*'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Proxy failed');
+            return response.text();
+        })
         .then(data => {
             const parser = new DOMParser();
             const xml = parser.parseFromString(data, 'text/xml');
+            
+            // Check for parsing errors
+            if (xml.querySelector('parsererror')) {
+                throw new Error('XML parsing failed');
+            }
+            
             const items = xml.querySelectorAll('item');
             
+            if (items.length === 0) {
+                throw new Error('No RSS items found');
+            }
+            
             feed.articles = Array.from(items).slice(0, 5).map(item => ({
-                title: item.querySelector('title')?.textContent || 'No title',
-                link: item.querySelector('link')?.textContent || '#',
-                description: item.querySelector('description')?.textContent || 'No description',
-                pubDate: item.querySelector('pubDate')?.textContent || ''
+                title: item.querySelector('title')?.textContent?.trim() || 'No title',
+                link: item.querySelector('link')?.textContent?.trim() || '#',
+                description: item.querySelector('description')?.textContent?.trim() || 'No description',
+                pubDate: item.querySelector('pubDate')?.textContent?.trim() || new Date().toISOString()
             }));
             
             feed.lastUpdated = new Date().toISOString();
@@ -1140,19 +1214,13 @@ function fetchRSSFeed(feedId) {
             renderNews();
         })
         .catch(error => {
-            console.error('Error fetching RSS feed:', error);
-            // Add demo data
-            feed.articles = [
-                {
-                    title: 'Demo Article 1',
-                    link: '#',
-                    description: 'This is a demo article for testing.',
-                    pubDate: new Date().toISOString()
-                }
-            ];
-            saveData();
-            renderNews();
+            console.error(`Proxy ${currentProxy} failed:`, error);
+            currentProxy++;
+            tryProxy();
         });
+    }
+    
+    tryProxy();
 }
 
 function renderNews() {
@@ -1287,4 +1355,31 @@ function clearAIChat() {
 // Add sample data on first load if no data exists
 if (localStorage.getItem('dashboard_bookmarks') === null) {
     addSampleData();
+    
+    // Add sample RSS feeds
+    const sampleFeeds = [
+        {
+            id: Date.now() + 1,
+            name: 'BBC News',
+            url: 'https://feeds.bbci.co.uk/news/rss.xml',
+            articles: [],
+            lastUpdated: new Date().toISOString()
+        },
+        {
+            id: Date.now() + 2,
+            name: 'TechCrunch',
+            url: 'https://techcrunch.com/feed/',
+            articles: [],
+            lastUpdated: new Date().toISOString()
+        }
+    ];
+    
+    newsFeeds = sampleFeeds;
+    saveData();
+    renderNews();
+    
+    // Try to fetch the sample feeds
+    sampleFeeds.forEach(feed => {
+        fetchRSSFeed(feed.id);
+    });
 } 
